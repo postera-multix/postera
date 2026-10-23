@@ -68,6 +68,20 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
 #tpls{max-height:360px;overflow:auto;padding:2px 8px 8px 2px}
 @media (max-width:860px){main{grid-template-columns:1fr;padding:12px}.panel{position:static;max-height:none}.stage{position:static;order:-1}canvas#cv{max-height:70vh}header p{display:none}.work{padding:14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}button:hover,button:active{transform:none!important}}
+
+/* Tata letak 3 kolom: halaman tidak di-scroll, poster selalu terlihat dan diperkecil otomatis */
+html,body{height:100%}
+body{display:flex;flex-direction:column;overflow:hidden}
+header{flex:none}
+main{flex:1;min-height:0;grid-template-columns:minmax(290px,370px) minmax(0,1fr) minmax(230px,280px);grid-template-rows:minmax(0,1fr);gap:16px;padding:14px 16px;align-items:stretch}
+.panel{position:static;max-height:none;min-height:0}
+.sh{font:800 18px 'Bricolage Grotesque',sans-serif;margin:10px 0 0}
+.stage{position:static;min-height:0;display:flex;flex-direction:column;gap:10px}
+.tb{flex:none;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+#stp{font-size:13px;font-weight:700;color:var(--mute)}
+.work{flex:1;min-height:0;align-items:center;overflow:hidden;padding:12px}
+canvas#cv{max-width:none;max-height:none;flex:none}
+@media (max-width:860px){html,body{height:auto}body{display:block;overflow:auto}main{display:flex;flex-direction:column;padding:12px;gap:16px}.panel{flex:none}.stage{order:-1;flex:none;position:sticky;top:0;z-index:5;height:58vh;background:var(--bg);padding:6px 0}}
 </style>
 </head>
 <body>
@@ -75,9 +89,6 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
 <header>
  <h1 class="logo">Postera</h1>
  <p>Pilih template, isi teks, unggah gambar. Poster langsung jadi.</p>
- <div class="grow"></div>
- <div class="dl" role="group" aria-label="Riwayat perubahan"><button id="undo" title="Urungkan (Ctrl+Z)" aria-keyshortcuts="Control+Z" disabled>&#8630; Urungkan</button><button id="redo" title="Ulangi (Ctrl+Y)" aria-keyshortcuts="Control+Y" disabled>Ulangi &#8631;</button></div>
- <div class="dl"><span>Unduh</span><button class="pri" data-f="png">PNG</button><button class="pri" data-f="jpg">JPG</button><button class="pri" data-f="pdf">PDF</button></div>
 </header>
 <main>
 <div class="panel">
@@ -138,25 +149,27 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
   <div class="g4" style="margin-top:8px"><button id="nl" aria-label="Geser kiri">Kiri</button><button id="nu" aria-label="Geser atas">Atas</button><button id="nd" aria-label="Geser bawah">Bawah</button><button id="nr" aria-label="Geser kanan">Kanan</button></div>
   <div class="g2" style="margin-top:6px"><button id="rp">Reset / pusatkan</button><button id="rpa">Reset semua posisi</button></div>
  </fieldset>
- <fieldset><legend>Proyek</legend>
-  <div class="g2"><button id="sp">Simpan proyek</button><button id="lpb">Buka proyek</button></div>
-  <input type="file" id="lp" accept="application/json" hidden>
-  <p id="as" class="hint" role="status">Simpan otomatis aktif: pekerjaan tersimpan di browser ini.</p>
-  <p class="hint">File proyek menyimpan teks, warna, posisi, dan elemen tambahan (kecuali gambar). Gambar dan logo perlu diunggah lagi.</p>
- </fieldset>
+</div>
+<div class="stage"><div class="tb" role="group" aria-label="Riwayat perubahan"><button id="undo" title="Urungkan (Ctrl+Z)" aria-keyshortcuts="Control+Z" disabled>&#8630; Urungkan</button><button id="redo" title="Ulangi (Ctrl+Y)" aria-keyshortcuts="Control+Y" disabled>Ulangi &#8631;</button><span id="stp" role="status"></span></div><div class="work" id="wk"><canvas id="cv" width="900" height="1273" tabindex="0" aria-label="Pratinjau poster. Seret teks untuk memindahkan, atau gunakan tombol panah."></canvas></div></div>
+<aside class="panel side" aria-label="Simpan poster"><h2 class="sh">Simpan poster</h2>
  <fieldset><legend>Unduh</legend>
   <label for="q">Kualitas JPG dan PDF: <span id="qv">85</span>%</label><input type="range" id="q" min="20" max="100" value="85">
   <p id="est" class="hint"></p>
   <button id="vid" class="pri" style="width:100%;margin-bottom:8px">Rekam video animasi (WebM, 5 detik)</button>
   <div class="g3"><button class="pri" data-f="png">PNG</button><button class="pri" data-f="jpg">JPG</button><button class="pri" data-f="pdf">PDF</button></div>
  </fieldset>
-</div>
-<div class="stage"><div class="work"><canvas id="cv" width="900" height="1273" tabindex="0" aria-label="Pratinjau poster. Seret teks untuk memindahkan, atau gunakan tombol panah."></canvas></div></div>
+ <fieldset><legend>Proyek</legend>
+  <div class="g2"><button id="sp">Simpan proyek</button><button id="lpb">Buka proyek</button></div>
+  <input type="file" id="lp" accept="application/json" hidden>
+  <p id="as" class="hint" role="status">Simpan otomatis aktif: pekerjaan tersimpan di browser ini.</p>
+  <p class="hint">File proyek menyimpan teks, warna, posisi, dan elemen tambahan (kecuali gambar). Gambar dan logo perlu diunggah lagi.</p>
+ </fieldset>
+</aside>
 </main>
 <div id="msg" role="status" aria-live="polite"></div>
 <script>
 const $=id=>document.getElementById(id),cv=$('cv'),ctx=cv.getContext('2d'),W=900;
-let pz={z:1,x:0,y:0},PI=null,H=1273,tpl='brutal',img=null,logo=null,FAM='',sel='judul',boxes=[],off={},items=[],uid=0,cnt={};
+var fitH=0;let pz={z:1,x:0,y:0},PI=null,H=1273,tpl='brutal',img=null,logo=null,FAM='',sel='judul',boxes=[],off={},items=[],uid=0,cnt={};
 const FONTS=['Bricolage Grotesque','Playfair Display','Space Grotesk','Archivo Black','Bebas Neue','Caveat'];
 const TPL={kampus:'Acara kampus',promo:'Promosi',minimal:'Pengumuman',ucapan:'Ucapan',foto:'Foto penuh',neon:'Neon',retro:'Retro',polaroid:'Polaroid',split:'Foto samping',lingkaran:'Lingkaran',majalah:'Majalah',brutal:'Blok tebal',tipo:'Tipografi',blok:'Kartu tebal',stabilo:'Buku catatan',kutipan:'Kutipan',undangan:'Undangan',kartu:'Kartu warna'};
 const TPAL={kampus:['#0b2a6f','#ffb703','#ffffff'],promo:['#4a0d67','#ffe14d','#ffffff'],minimal:['#0f5c5c','#ff7a59','#ffffff'],ucapan:['#d81b60','#ffc2dd','#ffffff'],foto:['#5a0f1b','#ff9f1c','#fff4e0'],neon:['#06061f','#00e5ff','#ffffff'],retro:['#8c2f1b','#e9a23b','#f2e8d5'],polaroid:['#4b3bb5','#ffd6a5','#ffffff'],split:['#0b6e4f','#ff8fab','#ffffff'],lingkaran:['#b83200','#ffcf70','#ffffff'],majalah:['#111111','#ff1744','#f5f5f5'],brutal:['#14001f','#c6ff00','#ffffff'],tipo:['#4e2a1a','#f6c28b','#fff3e6'],blok:['#6a1b9a','#7ee0d1','#ffffff'],stabilo:['#355070','#ffb4a2','#ffffff'],kutipan:['#3f4a1c','#f9c74f','#fffbe6'],undangan:['#1f4e5f','#d4af37','#ffffff'],kartu:['#023047','#8ecae6','#ffffff']};
@@ -303,7 +316,7 @@ function deco(s,exp){const tt=exp&&!recOn?1.2:TT,h=hsh(tpl),c=i=>GZ[(h+i)%GZ.len
 
 function drawLogo(){if(!logo)return;const sz=+$('lz').value,c=$('lc').value,m=36,r=Math.min(sz/logo.width,sz/logo.height),w=logo.width*r,h=logo.height*r;
  ctx.drawImage(logo,c.includes('r')?W-m-w:m,c.includes('b')?H-m-h:m,w,h)}
-function draw(exp){FAM=`"${$('font').value}",system-ui,sans-serif`;if(cv.height!==H)cv.height=H;ctx.clearRect(0,0,W,H);boxes=[];PI=null;
+function draw(exp){FAM=`"${$('font').value}",system-ui,sans-serif`;if(cv.height!==H)cv.height=H;if(fitH!==H){fitH=H;fit()}ctx.clearRect(0,0,W,H);boxes=[];PI=null;
  const s=S();T[tpl](s);if($('gz').checked)deco(s,exp);drawLogo();txt('extra',s.e,64,28,772,s.es,700,s.a,'left',2);items.forEach(drawItem);
  if(!exp&&!recOn){const it=getIt();if(it)outline(it);else{const b=boxes.find(x=>x.id===sel);if(b){ctx.save();ctx.setLineDash([10,8]);ctx.strokeStyle='#7c4dff';ctx.lineWidth=4;ctx.strokeRect(b.x-8,b.y-6,b.w+16,b.h+12);ctx.restore()}}}
  ctr()}
@@ -464,6 +477,10 @@ async function rec(){if(!window.MediaRecorder||!cv.captureStream){msg('Browser i
  recOn=true;mr.start();msg('Merekam 5 detik. Jangan pindah tab ya.');setTimeout(()=>mr.stop(),5000)}
 $('vid').onclick=rec;
 draw();
+// ---- Ukuran poster otomatis mengikuti ruang tengah (tanpa scroll halaman) ----
+function fit(){const wk=$('wk'),cs=getComputedStyle(wk),aw=wk.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-14,ah=wk.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-14;if(aw<50||ah<50)return;const k=Math.min(aw/W,ah/H);cv.style.width=Math.floor(W*k)+'px';cv.style.height=Math.floor(H*k)+'px'}
+new ResizeObserver(fit).observe($('wk'));fit();
+
 // ---- Geser dan zoom foto utama ----
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function clampPz(){if(!PI)return;pz.x=clamp(pz.x,-Math.abs(PI.bw*pz.z-PI.w)/2/PI.w,Math.abs(PI.bw*pz.z-PI.w)/2/PI.w);pz.y=clamp(pz.y,-Math.abs(PI.bh*pz.z-PI.h)/2/PI.h,Math.abs(PI.bh*pz.z-PI.h)/2/PI.h)}
@@ -489,7 +506,7 @@ function restore(d){HF.forEach(i=>{if(d.f&&d.f[i]!=null)$(i).value=d.f[i]});$('g
  if(!(sel in ELS)&&!getIt())sel='judul';
  setSize();if(TPL[d.tpl])setTpl(d.tpl,true);refreshEl();syncCtl();syncPz();redraw()}
 let hist=[],hi=-1,ct=0;
-const updUR=()=>{$('undo').disabled=hi<=0;$('redo').disabled=hi>=hist.length-1};
+const updUR=()=>{$('undo').disabled=hi<=0;$('redo').disabled=hi>=hist.length-1;$('stp').textContent=`Langkah ${hi+1} dari ${hist.length}`};
 function commit(){clearTimeout(ct);ct=0;const s=snap();if(s===hist[hi])return;hist=hist.slice(0,hi+1);hist.push(s);if(hist.length>100)hist.shift();hi=hist.length-1;updUR();autosave()}
 function cmt(){clearTimeout(ct);ct=setTimeout(commit,450)}
 function flush(){if(ct)commit()}
