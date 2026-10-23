@@ -11,9 +11,10 @@
 :root[data-theme="dark"]{--bg:#1a0a2b;--panel:#27123f;--ink:#fff7e8;--mute:#cdb8e6;--ok:#7dffb0;--bad:#ff8a9b}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 'Bricolage Grotesque',system-ui,sans-serif}
+html,body{height:100%}
+body{margin:0;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden;background:var(--bg);color:var(--ink);font:15px/1.4 'Bricolage Grotesque',system-ui,sans-serif}
 .skip{position:absolute;left:-999px}.skip:focus{left:8px;top:8px;background:var(--yel);color:#14001f;padding:8px;z-index:9;border:2px solid #14001f}
-header{display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:10px 18px;background:linear-gradient(100deg,var(--pink),var(--vio) 55%,var(--cy));border-bottom:3px solid var(--ink);color:#fff}
+header{flex-shrink:0;display:flex;gap:10px 14px;align-items:center;flex-wrap:wrap;padding:10px 18px;background:linear-gradient(100deg,var(--pink),var(--vio) 55%,var(--cy));border-bottom:3px solid var(--ink);color:#fff}
 .logo{font:800 28px 'Archivo Black','Bricolage Grotesque',sans-serif;letter-spacing:-.02em;color:#fff;text-shadow:3px 3px 0 #14001f;margin:0;line-height:1}.logo span{color:var(--lime)}
 header p{margin:0;font-weight:700;font-size:13.5px;text-shadow:1px 1px 0 rgba(20,0,31,.55);max-width:46ch}
 .grow{flex:1}.dl{display:flex;gap:8px;align-items:center;font-weight:800;font-size:13px;text-shadow:1px 1px 0 rgba(20,0,31,.55)}
@@ -24,8 +25,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
 button.pri{background:var(--lime);font-weight:800}
 button[aria-pressed=true]{background:var(--yel);font-weight:800}
 :focus-visible{outline:3px solid var(--yel);outline-offset:2px;box-shadow:0 0 0 6px #14001f}
-main{display:grid;grid-template-columns:minmax(310px,410px) 1fr;gap:20px;padding:18px 20px 30px;align-items:start}
-.panel{background:var(--panel);border:3px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--ink);padding:6px 16px 14px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto}
+main{flex:1;min-height:0;display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr) minmax(230px,290px);gap:16px;padding:14px 16px 16px;align-items:stretch}
+.panel{background:var(--panel);border:3px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--ink);padding:6px 16px 14px;overflow:auto;min-height:0;min-width:0}
+.panel.side{align-self:start;max-height:100%}
+.ph{font:800 19px 'Archivo Black','Bricolage Grotesque',sans-serif;margin:10px 0 2px;letter-spacing:-.01em}
 fieldset{border:0;border-bottom:2.5px dashed var(--ink);margin:0;padding:12px 0 14px;min-width:0}fieldset:last-child{border:0}
 legend{font:800 14px 'Bricolage Grotesque',sans-serif;padding:3px 13px;margin-bottom:10px;border:2.5px solid #14001f;border-radius:999px;background:var(--yel);color:#14001f;box-shadow:2px 2px 0 #14001f;transform:rotate(-1.5deg)}
 fieldset:nth-of-type(4n+2) legend{background:var(--lime);transform:rotate(1deg)}
@@ -47,9 +50,11 @@ button.th{padding:0;overflow:hidden;display:flex;flex-direction:column;box-shado
 .th span{padding:5px 2px;line-height:1.1}
 button.pal{display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 4px;font-size:12px;font-weight:700;min-height:0}
 .sws{display:flex;width:100%;border:2px solid #14001f;border-radius:6px;overflow:hidden}.sws i{flex:1;height:18px}
-.stage{position:sticky;top:12px;text-align:center}
-.work{display:flex;justify-content:center;padding:20px;border:3px solid var(--ink);border-radius:16px;background:repeating-conic-gradient(#0001 0 25%,transparent 0 50%) 0 0/20px 20px,var(--bg)}
-canvas#cv{max-width:100%;max-height:calc(100vh - 110px);width:auto;height:auto;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);background:#fff;cursor:move;touch-action:none}
+.stage{display:flex;flex-direction:column;gap:10px;min-height:0;min-width:0;text-align:center}
+.bar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;flex-shrink:0}
+.bar .hint{margin:0 6px}
+.work{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:14px;overflow:hidden;border:3px solid var(--ink);border-radius:16px;background:repeating-conic-gradient(#0001 0 25%,transparent 0 50%) 0 0/20px 20px,var(--bg)}
+canvas#cv{display:block;flex:none;width:300px;height:424px;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);background:#fff;cursor:move;touch-action:none}
 .hint{color:var(--mute);font-size:13px;margin:8px 0 0}
 #ctr{font-size:13px;font-weight:700;margin-top:8px;min-height:20px}
 #est{margin:8px 0}
@@ -66,7 +71,7 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
 .emg button{padding:0;min-height:34px;font-size:20px;box-shadow:1px 1px 0 #14001f;border-width:2px;border-radius:8px}
 [hidden]{display:none!important}
 #tpls{max-height:360px;overflow:auto;padding:2px 8px 8px 2px}
-@media (max-width:860px){main{grid-template-columns:1fr;padding:12px}.panel{position:static;max-height:none}.stage{position:static;order:-1}canvas#cv{max-height:70vh}header p{display:none}.work{padding:14px}}
+@media (max-width:980px){body{display:block;height:auto;overflow:auto}main{display:flex;flex-direction:column;padding:10px;gap:12px}.stage{order:-1;position:sticky;top:0;z-index:5;height:52vh;height:52dvh;background:var(--bg);padding:6px 0 4px}.panel,.panel.side{overflow:visible;max-height:none;align-self:stretch}header p{display:none}.work{padding:10px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}button:hover,button:active{transform:none!important}}
 </style>
 </head>
@@ -75,11 +80,9 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
 <header>
  <h1 class="logo">Postera</h1>
  <p>Pilih template, isi teks, unggah gambar. Poster langsung jadi.</p>
- <div class="grow"></div>
- <div class="dl"><span>Unduh</span><button class="pri" data-f="png">PNG</button><button class="pri" data-f="jpg">JPG</button><button class="pri" data-f="pdf">PDF</button></div>
 </header>
 <main>
-<div class="panel">
+<div class="panel" id="pl"><h2 class="ph">Desain poster</h2>
  <fieldset><legend>Pilih template</legend><div class="g3" id="tfil" style="margin-bottom:10px"><button data-tf="all" aria-pressed="true">Semua</button><button data-tf="img" aria-pressed="false">Pakai gambar</button><button data-tf="txt" aria-pressed="false">Hanya tulisan</button></div><div class="g3" id="tpls"></div>
   <label class="chk"><input type="checkbox" id="gz" checked> Gaya Gen Z (stiker, tape, grain)</label><label class="chk"><input type="checkbox" id="an" checked> Dekorasi bergerak di pratinjau</label>
   <label for="sz">Ukuran poster</label><select id="sz"><option value="a4">A4 potret (900 x 1273)</option><option value="story">Story 9:16 (900 x 1600)</option></select></fieldset>
@@ -146,12 +149,33 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
   <div class="g3"><button class="pri" data-f="png">PNG</button><button class="pri" data-f="jpg">JPG</button><button class="pri" data-f="pdf">PDF</button></div>
  </fieldset>
 </div>
-<div class="stage"><div class="work"><canvas id="cv" width="900" height="1273" tabindex="0" aria-label="Pratinjau poster. Seret teks untuk memindahkan, atau gunakan tombol panah."></canvas></div></div>
+<div class="stage">
+ <div class="bar" role="toolbar" aria-label="Riwayat perubahan">
+  <button id="undo" disabled title="Urungkan (Ctrl+Z)">&#8630; Urungkan</button>
+  <button id="redo" disabled title="Ulangi (Ctrl+Y)">Ulangi &#8631;</button>
+  <span id="hist" class="hint"></span>
+ </div>
+ <div class="work" id="work"><canvas id="cv" width="900" height="1273" tabindex="0" aria-label="Pratinjau poster. Seret teks untuk memindahkan, atau gunakan tombol panah."></canvas></div>
+ <p class="hint" style="margin:0">Seret elemen langsung di poster. Panel kiri untuk mendesain, panel kanan untuk menyimpan.</p>
+</div>
+<aside class="panel side" id="pr"><h2 class="ph">Simpan poster</h2>
+ <fieldset><legend>Unduh</legend>
+  <label for="q">Kualitas JPG dan PDF: <span id="qv">85</span>%</label><input type="range" id="q" min="20" max="100" value="85">
+  <p id="est" class="hint"></p>
+  <button id="vid" class="pri" style="width:100%;margin-bottom:8px">Rekam video animasi (WebM, 5 detik)</button>
+  <div class="g3"><button class="pri" data-f="png">PNG</button><button class="pri" data-f="jpg">JPG</button><button class="pri" data-f="pdf">PDF</button></div>
+ </fieldset>
+ <fieldset><legend>Proyek</legend>
+  <div class="g2"><button id="sp">Simpan proyek</button><button id="lpb">Buka proyek</button></div>
+  <input type="file" id="lp" accept="application/json" hidden>
+  <p class="hint">File proyek menyimpan teks, warna, posisi, dan elemen tambahan (kecuali gambar). Gambar dan logo perlu diunggah lagi.</p>
+ </fieldset>
+</aside>
 </main>
 <div id="msg" role="status" aria-live="polite"></div>
 <script>
 const $=id=>document.getElementById(id),cv=$('cv'),ctx=cv.getContext('2d'),W=900;
-let H=1273,tpl='brutal',img=null,logo=null,FAM='',sel='judul',boxes=[],off={},items=[],uid=0,cnt={};
+let imgId=0,H=1273,tpl='brutal',img=null,logo=null,FAM='',sel='judul',boxes=[],off={},items=[],uid=0,cnt={};
 const FONTS=['Bricolage Grotesque','Playfair Display','Space Grotesk','Archivo Black','Bebas Neue','Caveat'];
 const TPL={kampus:'Acara kampus',promo:'Promosi',minimal:'Pengumuman',ucapan:'Ucapan',foto:'Foto penuh',neon:'Neon',retro:'Retro',polaroid:'Polaroid',split:'Foto samping',lingkaran:'Lingkaran',majalah:'Majalah',brutal:'Blok tebal',tipo:'Tipografi',blok:'Kartu tebal',stabilo:'Buku catatan',kutipan:'Kutipan',undangan:'Undangan',kartu:'Kartu warna'};
 const TPAL={kampus:['#0b2a6f','#ffb703','#ffffff'],promo:['#4a0d67','#ffe14d','#ffffff'],minimal:['#0f5c5c','#ff7a59','#ffffff'],ucapan:['#d81b60','#ffc2dd','#ffffff'],foto:['#5a0f1b','#ff9f1c','#fff4e0'],neon:['#06061f','#00e5ff','#ffffff'],retro:['#8c2f1b','#e9a23b','#f2e8d5'],polaroid:['#4b3bb5','#ffd6a5','#ffffff'],split:['#0b6e4f','#ff8fab','#ffffff'],lingkaran:['#b83200','#ffcf70','#ffffff'],majalah:['#111111','#ff1744','#f5f5f5'],brutal:['#14001f','#c6ff00','#ffffff'],tipo:['#4e2a1a','#f6c28b','#fff3e6'],blok:['#6a1b9a','#7ee0d1','#ffffff'],stabilo:['#355070','#ffb4a2','#ffffff'],kutipan:['#3f4a1c','#f9c74f','#fffbe6'],undangan:['#1f4e5f','#d4af37','#ffffff'],kartu:['#023047','#8ecae6','#ffffff']};
@@ -298,7 +322,7 @@ function deco(s,exp){const tt=exp&&!recOn?1.2:TT,h=hsh(tpl),c=i=>GZ[(h+i)%GZ.len
 
 function drawLogo(){if(!logo)return;const sz=+$('lz').value,c=$('lc').value,m=36,r=Math.min(sz/logo.width,sz/logo.height),w=logo.width*r,h=logo.height*r;
  ctx.drawImage(logo,c.includes('r')?W-m-w:m,c.includes('b')?H-m-h:m,w,h)}
-function draw(exp){FAM=`"${$('font').value}",system-ui,sans-serif`;if(cv.height!==H)cv.height=H;ctx.clearRect(0,0,W,H);boxes=[];
+function draw(exp){FAM=`"${$('font').value}",system-ui,sans-serif`;if(cv.height!==H){cv.height=H;fit()}ctx.clearRect(0,0,W,H);boxes=[];
  const s=S();T[tpl](s);if($('gz').checked)deco(s,exp);drawLogo();txt('extra',s.e,64,28,772,s.es,700,s.a,'left',2);items.forEach(drawItem);
  if(!exp&&!recOn){const it=getIt();if(it)outline(it);else{const b=boxes.find(x=>x.id===sel);if(b){ctx.save();ctx.setLineDash([10,8]);ctx.strokeStyle='#7c4dff';ctx.lineWidth=4;ctx.strokeRect(b.x-8,b.y-6,b.w+16,b.h+12);ctx.restore()}}}
  ctr()}
@@ -359,7 +383,7 @@ function syncCtl(){const it=getIt();$('ib').hidden=!it;if(!it)return;$('itxw').h
  $('itx').value=it.tx||'';$('itc').value=it.c;$('its').value=it.s||48;$('itr').value=it.rot;$('ito').value=it.op}
 
 // Seret elemen di poster (teks template, elemen kustom, dan pegangan ubah ukuran)
-let drag=null;const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}};
+let drag=null;const pt=e=>{const r=cv.getBoundingClientRect(),b=cv.clientLeft;return{x:(e.clientX-r.left-b)*W/(r.width-2*b),y:(e.clientY-r.top-b)*H/(r.height-2*b)}};
 cv.addEventListener('pointerdown',e=>{const p=pt(e),cur=getIt();
  if(cur){const l=loc(cur,p);if(Math.abs(l.x-cur.w/2)<30&&Math.abs(l.y-cur.h/2)<30){drag={m:'rs',it:cur,w0:cur.w,h0:cur.h};cv.setPointerCapture(e.pointerId);return}}
  const hit=[...items].reverse().find(i=>{const l=loc(i,p);return Math.abs(l.x)<=i.w/2&&Math.abs(l.y)<=i.h/2});
@@ -420,10 +444,10 @@ async function out(f){await redraw();draw(true);const q=$('q').value/100;let b;
 
 // Simpan dan buka proyek
 function saveProj(){const d={tpl,gr:$('gr').checked,off,items:items.filter(i=>i.t!='image'),uid,cnt,f:{}};FIELDS.forEach(i=>d.f[i]=$(i).value);save(new Blob([JSON.stringify(d)],{type:'application/json'}),'postera-proyek.json');msg('Proyek disimpan.')}
-function loadProj(f){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);FIELDS.forEach(i=>{if(d.f&&d.f[i]!=null)$(i).value=d.f[i]});$('gr').checked=!!d.gr;off=d.off||{};items=d.items||[];uid=d.uid||0;cnt=d.cnt||{};sel='judul';refreshEl();syncCtl();if(TPL[d.tpl])setTpl(d.tpl,true);setSize();msg('Proyek dibuka. Unggah ulang gambar dan logo jika perlu.');redraw()}catch(e){msg('File proyek tidak valid.')}};r.readAsText(f)}
+function loadProj(f){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);FIELDS.forEach(i=>{if(d.f&&d.f[i]!=null)$(i).value=d.f[i]});$('gr').checked=!!d.gr;off=d.off||{};items=d.items||[];uid=d.uid||0;cnt=d.cnt||{};sel='judul';refreshEl();syncCtl();if(TPL[d.tpl])setTpl(d.tpl,true);setSize();msg('Proyek dibuka. Unggah ulang gambar dan logo jika perlu.');redraw();later()}catch(e){msg('File proyek tidak valid.')}};r.readAsText(f)}
 function setSize(){H=$('sz').value=='story'?1600:1273}
 function setTpl(k,quiet){tpl=k;if(!quiet)setCol(k);$('tpls').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k==k));if(!quiet)redraw()}
-function loadImg(f,cb){if(!f)return;const im=new Image();im.onload=()=>cb(im);im.onerror=()=>msg('File tidak bisa dibaca sebagai gambar.');im.src=URL.createObjectURL(f)}
+function loadImg(f,cb){if(!f)return;const im=new Image();im.onload=()=>{im._id=++imgId;cb(im);later()};im.onerror=()=>msg('File tidak bisa dibaca sebagai gambar.');im.src=URL.createObjectURL(f)}
 
 // Susun antarmuka
 for(const k in TPL){const b=document.createElement('button');b.className='th';b.innerHTML=`<canvas width="180" height="255" data-k="${k}" aria-hidden="true"></canvas><span>${TPL[k]}</span>`;b.dataset.k=k;b.setAttribute('aria-pressed',k==tpl);b.onclick=()=>setTpl(k);$('tpls').appendChild(b)}
@@ -451,7 +475,33 @@ async function rec(){if(!window.MediaRecorder||!cv.captureStream){msg('Browser i
  mr.onstop=()=>{recOn=false;draw();const b=new Blob(ch,{type:'video/webm'});save(b,'postera-animasi.webm');msg(`Tersimpan: postera-animasi.webm (${kb(b.size)})`)};
  recOn=true;mr.start();msg('Merekam 5 detik. Jangan pindah tab ya.');setTimeout(()=>mr.stop(),5000)}
 $('vid').onclick=rec;
-draw();
+
+// ---- Poster selalu pas di tengah layar (tanpa scroll) ----
+function fit(){const w=$('work'),cs=getComputedStyle(w),aw=w.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-14,ah=w.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-14;
+ if(aw<60||ah<60)return;const k=Math.min(aw/(W+6),ah/(H+6));cv.style.width=Math.floor(W*k+6)+'px';cv.style.height=Math.floor(H*k+6)+'px'}
+if(window.ResizeObserver)new ResizeObserver(fit).observe($('work'));addEventListener('resize',fit);
+
+// ---- Undo / Redo (riwayat perubahan desain) ----
+const HF=FIELDS.filter(i=>i!='q'),hist=[];let hi=-1,histT=0,restoring=false;
+const hsnap=()=>({tpl,sel,f:Object.fromEntries(HF.map(i=>[i,$(i).value])),gr:$('gr').checked,gz:$('gz').checked,off:JSON.parse(JSON.stringify(off)),items:items.map(i=>({...i})),img,logo});
+const hkey=s=>JSON.stringify({tpl:s.tpl,f:s.f,gr:s.gr,gz:s.gz,off:s.off,img:s.img&&s.img._id,logo:s.logo&&s.logo._id,
+ items:s.items.map(i=>{const o={...i,im:i.im&&i.im._id};if(i.t=='text')delete o.h;return o})});
+function hbtn(){$('undo').disabled=hi<=0;$('redo').disabled=hi>=hist.length-1;$('hist').textContent=hist.length>1?`Langkah ${hi+1} dari ${hist.length}`:''}
+function commit(){if(restoring)return;const s=hsnap(),k=hkey(s);if(hi>=0&&hist[hi].k===k)return;hist.length=hi+1;hist.push({s,k});if(hist.length>100)hist.shift();hi=hist.length-1;hbtn()}
+function later(){clearTimeout(histT);histT=setTimeout(commit,400)}
+function hrestore(e){restoring=true;const s=e.s;
+ HF.forEach(i=>{$(i).value=s.f[i]});$('gr').checked=s.gr;$('gz').checked=s.gz;
+ img=s.img;logo=s.logo;if(!img)$('file').value='';if(!logo)$('lfile').value='';
+ off=JSON.parse(JSON.stringify(s.off));items=s.items.map(i=>({...i}));tpl=s.tpl;
+ $('tpls').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k==tpl));
+ sel=(s.sel in ELS||items.some(i=>'i'+i.id===s.sel))?s.sel:'judul';
+ setSize();refreshEl();syncCtl();fit();$('qv').textContent=$('q').value;restoring=false;redraw()}
+function hgo(d){clearTimeout(histT);commit();const n=hi+d;if(n<0||n>=hist.length)return;hi=n;hrestore(hist[hi]);hbtn();msg(d<0?'Perubahan diurungkan.':'Perubahan diulang.')}
+$('undo').onclick=()=>hgo(-1);$('redo').onclick=()=>hgo(1);
+['input','change','click','keydown','pointerup'].forEach(t=>document.querySelector('main').addEventListener(t,e=>{if(e.target.closest&&e.target.closest('#undo,#redo'))return;later()}));
+addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey))return;const k=e.key.toLowerCase();if(k!='z'&&k!='y')return;
+ if(e.target.matches&&e.target.matches('input[type=text],textarea'))return;e.preventDefault();hgo(k=='y'||e.shiftKey?1:-1)});
+fit();draw();commit();
 </script>
 </body>
 </html>
