@@ -69,6 +69,7 @@ button.ico{padding:3px;min-height:46px;display:flex;align-items:center;justify-c
 @media (max-width:860px){main{grid-template-columns:1fr;padding:12px}.panel{position:static;max-height:none}.stage{position:static;order:-1}canvas#cv{max-height:70vh}header p{display:none}.work{padding:14px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}button:hover,button:active{transform:none!important}}
 
+/* Tata letak 3 kolom: halaman tidak di-scroll, poster selalu terlihat dan diperkecil otomatis */
 html,body{height:100%}
 body{display:flex;flex-direction:column;overflow:hidden}
 header{flex:none}
@@ -81,6 +82,7 @@ main{flex:1;min-height:0;grid-template-columns:minmax(290px,370px) minmax(0,1fr)
 .work{flex:1;min-height:0;align-items:center;overflow:hidden;padding:12px}
 canvas#cv{max-width:none;max-height:none;flex:none}
 @media (max-width:860px){html,body{height:auto}body{display:block;overflow:auto}main{display:flex;flex-direction:column;padding:12px;gap:16px}.panel{flex:none}.stage{order:-1;flex:none;position:sticky;top:0;z-index:5;height:58vh;background:var(--bg);padding:6px 0}}
+.llist{display:grid;gap:8px;margin-top:10px}.lrow{display:flex;align-items:center;gap:10px;border:2.5px solid #14001f;border-radius:10px;padding:6px;background:#fff;color:#14001f}.lrow[data-sel="1"]{outline:3px solid var(--pink);outline-offset:1px}.lrow img{width:44px;height:44px;object-fit:contain;background:repeating-conic-gradient(#ddd 0 25%,#fff 0 50%) 0 0/12px 12px;border:2px solid #14001f;border-radius:6px;flex:none}.lrow .ln{flex:1;font-weight:700;font-size:14px;text-align:left;background:none;border:0;box-shadow:none;padding:4px;min-height:0}.lrow .ld{flex:none;min-height:34px;padding:4px 10px;background:#ff5a5f;font-weight:800}
 </style>
 </head>
 <body>
@@ -117,7 +119,9 @@ canvas#cv{max-width:none;max-height:none;flex:none}
  </fieldset>
  <fieldset><legend>Logo atau stiker</legend>
   <input type="file" id="lfile" accept="image/*" multiple aria-label="Unggah logo, boleh lebih dari satu">
-  <p class="hint">Pilih satu atau banyak logo sekaligus (bisa ditambah lagi kapan saja). Seret logo di poster ke posisi yang kamu mau, ubah ukurannya lewat kotak pink di sudut, lalu atur putaran, transparansi, atau hapus lewat "Pengaturan elemen terpilih".</p>
+  <p class="hint">Pilih satu atau banyak logo sekaligus (bisa ditambah lagi kapan saja). Seret logo di poster ke posisi yang kamu mau, ubah ukurannya lewat kotak pink di sudut, lalu atur putaran, transparansi, atau hapus lewat daftar logo di bawah ini.</p>
+  <div class="llist" id="llist" aria-live="polite"></div>
+  <button id="lclear" style="width:100%;margin-top:8px" hidden>Hapus semua logo</button>
  </fieldset>
  <fieldset><legend>Warna dan font</legend>
   <label for="font">Font</label><select id="font"></select>
@@ -184,7 +188,7 @@ function path(sh,x,y,w,h){ctx.beginPath();
  else if(sh=='arch'){ctx.moveTo(x,y+h);ctx.lineTo(x,y+w/2);ctx.arc(x+w/2,y+w/2,w/2,Math.PI,0);ctx.lineTo(x+w,y+h);ctx.closePath()}
  else if(sh=='slant'){ctx.moveTo(x,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+h-110);ctx.lineTo(x,y+h);ctx.closePath()}
  else if(sh=='round')ctx.roundRect(x,y,w,h,28);else ctx.rect(x,y,w,h)}
-
+// Gambar di-crop mengisi area; jika 'Pas gambar' aktif, gambar ditampilkan utuh tanpa dipotong; tanpa gambar tampil placeholder
 function pic(x,y,w,h,s,sh){ctx.save();path(sh,x,y,w,h);ctx.clip();
  if(img){const fit=$('ft').checked,k=(fit?Math.min:Math.max)(w/img.width,h/img.height),bw=img.width*k,bh=img.height*k,iw=bw*pz.z,ih=bh*pz.z,mx=Math.abs(iw-w)/2,my=Math.abs(ih-h)/2,dx=Math.max(-mx,Math.min(mx,pz.x*w)),dy=Math.max(-my,Math.min(my,pz.y*h));PI={x,y,w,h,bw,bh,sh,T:ctx.getTransform()};if(fit){ctx.fillStyle=s.a;ctx.globalAlpha=.25;ctx.fillRect(x,y,w,h);ctx.globalAlpha=1}ctx.filter=s.fl;ctx.drawImage(img,x+(w-iw)/2+dx,y+(h-ih)/2+dy,iw,ih);ctx.filter='none'}
  else{ctx.fillStyle=s.a;ctx.globalAlpha=.3;ctx.fillRect(x,y,w,h);ctx.strokeStyle=s.a;ctx.lineWidth=4;ctx.globalAlpha=.6;
@@ -194,7 +198,7 @@ function pic(x,y,w,h,s,sh){ctx.save();path(sh,x,y,w,h);ctx.clip();
 function lines(t,w,size,wt,fam=FAM){ctx.font=`${wt} ${size}px ${fam}`;const L=[];let l='';
  for(const wd of t.split(/\s+/).filter(Boolean)){const u=l?l+' '+wd:wd;if(ctx.measureText(u).width>w&&l){L.push(l);l=wd}else l=u}
  if(l)L.push(l);return L}
-
+// Menulis teks; posisi bisa digeser lewat off[id]; kotaknya dicatat untuk drag
 function txt(id,t,x,y,w,size,wt,col,al='left',max=3,lh=1.15,fit=false){
  if(!t||!t.trim())return y;
  if(fit)size=fitS(t,w,size,max,wt);
@@ -208,7 +212,7 @@ function fitS(t,w,size,max,wt){while(size>36){const L=lines(t,w,size,wt);if(L.le
 function hl(id,t,x,y,w,size,wt,max,lh,col,fit){if(!t||!t.trim())return;if(fit)size=fitS(t,w,size,max,wt);const L=lines(t,w,size,wt).slice(0,max),o=off[id]||{x:0,y:0};ctx.font=`${wt} ${size}px ${FAM}`;ctx.globalAlpha=.9;ctx.fillStyle=col;L.forEach((ln,i)=>ctx.fillRect(x+o.x-10,y+o.y+i*size*lh+size*.42,ctx.measureText(ln).width+20,size*.58));ctx.globalAlpha=1}
 const rr=(c,x,y,w,h,r)=>{ctx.fillStyle=c;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};
 const T={
-
+// ---- dengan gambar ----
 polaroid(s){R(s.p,0,0,W,H);ctx.globalAlpha=.14;ctx.fillStyle=s.x;for(let x=36;x<W;x+=60)for(let y=36;y<H;y+=60)ctx.fillRect(x,y,6,6);ctx.globalAlpha=1;
  const iw=580,ch=iw+(H>1400?150:70),top=H>1400?120:70;ctx.save();ctx.translate(W/2,top+ch/2);ctx.rotate(-4*Math.PI/180);
  ctx.shadowColor='rgba(0,0,0,.4)';ctx.shadowBlur=36;ctx.shadowOffsetY=16;ctx.fillStyle='#fff';ctx.fillRect(-320,-ch/2,640,ch);ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
@@ -237,7 +241,7 @@ brutal(s){R(s.a,0,0,W,H);const ih=Math.round(H*.37),x=70,y0=90,w=W-140;
  txt('judul',s.j,bx+36,by+30,bw-72,104,800,s.x,'left',3,1.05,true);
  let y=txt('sub',s.s,70,by+bh+44,760,40,700,s.p,'left',2);txt('desc',s.d,70,y+14,760,28,400,s.p,'left',2,1.35);
  txt('tgl',s.t,70,H-123,760,30,700,s.p,'left',1);txt('lok',s.l,70,H-77,760,26,400,s.p,'left',1)},
-
+// ---- hanya tulisan ----
 tipo(s){R(s.p,0,0,W,H);R(s.a,64,70,110,110);ctx.globalAlpha=.9;ctx.fillStyle=s.x;ctx.beginPath();ctx.arc(W-130,125,55,0,7);ctx.fill();ctx.globalAlpha=1;
  let y=txt('judul',s.j,64,240,772,150,800,s.x,'left',5,.98,true);R(s.a,64,y+30,220,14);
  y=txt('sub',s.s,64,y+70,772,42,700,s.a,'left',2);txt('desc',s.d,64,y+18,772,30,400,s.x,'left',4,1.35);
@@ -263,7 +267,7 @@ undangan(s){R('#fbf5ea',0,0,W,H);ctx.strokeStyle=s.p;ctx.lineWidth=4;ctx.strokeR
 kartu(s){R(s.p,0,0,W,H);const ch=Math.round(H*.4);rr(s.a,50,70,W-100,ch,44);
  let y=txt('judul',s.j,96,126,W-192,110,800,s.p,'left',3,1.02,true);y=70+ch+44;y=txt('sub',s.s,60,y,W-120,40,700,s.a,'left',2);txt('desc',s.d,60,y+14,W-120,28,400,s.x,'left',4,1.35);
  rr(s.x,50,H-190,W-100,68,34);txt('tgl',s.t,70,H-171,W-140,30,700,s.p,'center',1);ctx.strokeStyle=s.a;ctx.lineWidth=4;ctx.beginPath();ctx.roundRect(50,H-108,W-100,60,30);ctx.stroke();txt('lok',s.l,70,H-91,W-140,26,400,s.x,'center',1)},
-
+// ---- template awal ----
 kampus(s){const ih=Math.round(H*.5);R(s.p,0,0,W,H);pic(0,0,W,ih,s,'rect');R(s.a,0,ih,W,18);
  let y=txt('judul',s.j,64,ih+54,772,100,800,s.x,'left',3,1.05,true);y=txt('sub',s.s,64,y+14,772,36,700,s.a,'left',2);txt('desc',s.d,64,y+18,772,28,400,s.x,'left',3,1.35);
  R(s.a,64,H-145,120,6);txt('tgl',s.t,64,H-123,772,30,700,s.a,'left',1);txt('lok',s.l,64,H-77,772,26,400,s.x,'left',1)},
@@ -289,7 +293,7 @@ retro(s){R('#f2e8d5',0,0,W,H);ctx.strokeStyle=s.p;ctx.lineWidth=14;ctx.strokeRec
  const h=Math.max(240,Math.min(Math.round(430*H/1273),H-420-y));R(s.p,120,y+16,660,h+20);pic(130,y+26,640,h,s,'rect');
  txt('desc',s.d,110,y+h+60,680,26,400,s.p,'center',3,1.35);txt('tgl',s.t,90,H-190,720,32,700,s.p,'center',1);txt('lok',s.l,90,H-140,720,26,400,s.p,'center',1)}};
 
-
+// ---- Gaya Gen Z / DKV: stiker die-cut, tape, tulisan berjalan, halftone, grain ----
 const GZ=['#ff4d8d','#c6ff00','#00d1ff','#ffd400','#7c4dff'],INK='#14001f',WORDS=['GASKEUN','NEW!','NO CAP','SLAY','YUK!','GAS!'],SPS=['star','sparkle','heart','plus','blob'];
 let grain=null,TT=0,recOn=false;
 const hsh=t=>[...t].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,7);
@@ -320,13 +324,13 @@ function draw(exp){FAM=`"${$('font').value}",system-ui,sans-serif`;if(cv.height!
 let rq=0;const req=()=>{if(rq)return;rq=requestAnimationFrame(()=>{rq=0;draw()})};
 async function redraw(){try{await document.fonts.load(`700 40px "${$('font').value}"`)}catch(e){}draw();est()}
 
-
+// Kontras teks terhadap latar (rasio WCAG)
 const lum=h=>{const c=[1,3,5].map(i=>{const v=parseInt(h.substr(i,2),16)/255;return v<=.03928?v/12.92:((v+.055)/1.055)**2.4});return .2126*c[0]+.7152*c[1]+.0722*c[2]};
 const ratio=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
 function ctr(){const p=$('c1').value,a=$('c2').value,x=$('c3').value,pr={promo:[p,a],minimal:[p,'#f6f7fb'],retro:[p,'#f2e8d5'],stabilo:[p,'#fffbe8'],undangan:[p,'#fbf5ea'],kartu:[p,a],brutal:[p,a]}[tpl]||[x,p],r=ratio(pr[0],pr[1]);
  $('ctr').textContent=`Kontras teks dan latar: ${r.toFixed(1)}:1 ${r>=4.5?'(baik)':'(rendah, teks sulit dibaca)'}`;$('ctr').style.color=r>=4.5?'var(--ok)':'var(--bad)'}
 
-
+// Elemen kustom: teks, bentuk, gambar, emoji
 let ecol='#ff4d8d';
 const SHP={rect:'Persegi',round:'Persegi bulat',circle:'Lingkaran',tri:'Segitiga',star:'Bintang',heart:'Hati',blob:'Blob',burst:'Ledakan',sparkle:'Kilau',arrow:'Panah',bubble:'Gelembung chat',ribbon:'Pita',plus:'Plus'};
 const KIND={text:'Teks',line:'Garis',frame:'Bingkai',image:'Gambar',emoji:'Emoji',...SHP};
@@ -369,11 +373,11 @@ function drawItem(it){ctx.save();ctx.globalAlpha=it.op/100;ctx.translate(it.x+it
  ctx.restore()}
 function outline(it){ctx.save();ctx.translate(it.x+it.w/2,it.y+it.h/2);ctx.rotate(it.rot*Math.PI/180);ctx.setLineDash([10,8]);ctx.strokeStyle='#7c4dff';ctx.lineWidth=4;ctx.strokeRect(-it.w/2,-it.h/2,it.w,it.h);ctx.setLineDash([]);ctx.fillStyle='#ff4d8d';ctx.strokeStyle='#14001f';ctx.lineWidth=4;ctx.fillRect(it.w/2-16,it.h/2-16,32,32);ctx.strokeRect(it.w/2-16,it.h/2-16,32,32);ctx.restore()}
 const loc=(it,p)=>{const a=-it.rot*Math.PI/180,dx=p.x-(it.x+it.w/2),dy=p.y-(it.y+it.h/2);return{x:dx*Math.cos(a)-dy*Math.sin(a),y:dx*Math.sin(a)+dy*Math.cos(a)}};
-function refreshEl(){const e=$('el');e.innerHTML='';for(const k in ELS)e.insertAdjacentHTML('beforeend',`<option value="${k}">${ELS[k]}</option>`);items.forEach(i=>e.insertAdjacentHTML('beforeend',`<option value="i${i.id}">${i.lg?'Logo':KIND[i.t]} ${i.n}</option>`));e.value=sel}
+function refreshEl(){const e=$('el');e.innerHTML='';for(const k in ELS)e.insertAdjacentHTML('beforeend',`<option value="${k}">${ELS[k]}</option>`);items.forEach(i=>e.insertAdjacentHTML('beforeend',`<option value="i${i.id}">${i.lg?'Logo':KIND[i.t]} ${i.n}</option>`));e.value=sel;if(typeof renderLogos=='function')renderLogos()}
 function syncCtl(){const it=getIt();$('ib').hidden=!it;if(!it)return;$('itxw').hidden=it.t!='text';$('itsw').hidden=it.t!='text';$('itcw').hidden=it.t=='image'||it.t=='emoji';$('iow').hidden=!SHP[it.t];$('itfw').hidden=it.t!='text';$('io').checked=!!it.o;$('itfo').value=it.f||'';
  $('itx').value=it.tx||'';$('itc').value=it.c;$('its').value=it.s||48;$('itr').value=it.rot;$('ito').value=it.op}
 
-
+// Seret elemen di poster (teks template, elemen kustom, dan pegangan ubah ukuran)
 let drag=null;const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*W/r.width,y:(e.clientY-r.top)*H/r.height}};
 cv.addEventListener('pointerdown',e=>{const p=pt(e),cur=getIt();
  if(cur){const l=loc(cur,p);if(Math.abs(l.x-cur.w/2)<30&&Math.abs(l.y-cur.h/2)<30){drag={m:'rs',it:cur,w0:cur.w,h0:cur.h};cv.setPointerCapture(e.pointerId);return}}
@@ -418,10 +422,10 @@ $('itb').onclick=()=>{const k=items.indexOf(getIt());if(k>0){[items[k],items[k-1
 $('itd').onclick=()=>{const it=getIt();if(!it)return;const c={...it,id:++uid,n:(cnt[it.lg?'logo':it.t]=(cnt[it.lg?'logo':it.t]||0)+1),x:it.x+30,y:it.y+30};items.push(c);sel='i'+c.id;refreshEl();syncCtl();draw();commit()};
 $('itdel').onclick=()=>{const it=getIt();if(!it)return;items=items.filter(i=>i!==it);sel='judul';refreshEl();syncCtl();draw();commit()};
 
-
+// Ukuran file perkiraan
 const kb=n=>n>1048576?(n/1048576).toFixed(2)+' MB':Math.round(n/1024)+' KB';
 let tm;function est(){clearTimeout(tm);tm=setTimeout(()=>{draw(true);cv.toBlob(b=>{if(b)$('est').textContent='Perkiraan ukuran JPG: '+kb(b.size)},'image/jpeg',$('q').value/100);draw();thumbs()},300)}
-let mt;
+let mt;// Thumbnail template: pratinjau mini memakai isi, warna, dan gambar yang sedang dipakai
 function thumbs(){const sv={tpl,items,logo,off,c:[$('c1').value,$('c2').value,$('c3').value]};items=[];logo=null;off={};
  document.querySelectorAll('#tpls canvas').forEach(c=>{if(c.closest('button').hidden)return;tpl=c.dataset.k;setCol(tpl);draw(true);const h=Math.round(c.width*H/W);if(c.height!==h)c.height=h;const x=c.getContext('2d');x.imageSmoothingQuality='high';x.drawImage(cv,0,0,c.width,c.height)});
  tpl=sv.tpl;items=sv.items;logo=sv.logo;off=sv.off;$('c1').value=sv.c[0];$('c2').value=sv.c[1];$('c3').value=sv.c[2];draw()}
@@ -439,14 +443,14 @@ async function out(f){await redraw();draw(true);const q=$('q').value/100;let b;
  if(f=='png')b=await new Promise(r=>cv.toBlob(r,'image/png'));else if(f=='jpg')b=await new Promise(r=>cv.toBlob(r,'image/jpeg',q));else b=await pdf(q);
  draw();const nm='postera-'+($('judul').value.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'poster')+'.'+f;save(b,nm);msg(`Tersimpan: ${nm} (${kb(b.size)})`)}
 
-
+// Simpan dan buka proyek
 function saveProj(){const d={tpl,pz,gr:$('gr').checked,ft:$('ft').checked,off,items:items.filter(i=>i.t!='image'),uid,cnt,f:{}};FIELDS.forEach(i=>d.f[i]=$(i).value);save(new Blob([JSON.stringify(d)],{type:'application/json'}),'postera-proyek.json');msg('Proyek disimpan.')}
 function loadProj(f){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);FIELDS.forEach(i=>{if(d.f&&d.f[i]!=null)$(i).value=d.f[i]});$('gr').checked=!!d.gr;$('ft').checked=!!d.ft;off=d.off||{};pz=d.pz&&typeof d.pz.z=='number'?{z:d.pz.z,x:d.pz.x||0,y:d.pz.y||0}:{z:1,x:0,y:0};syncPz();items=d.items||[];uid=d.uid||0;cnt=d.cnt||{};sel='judul';refreshEl();syncCtl();if(TPL[d.tpl])setTpl(d.tpl,true);setSize();msg('Proyek dibuka. Unggah ulang gambar dan logo jika perlu.');redraw();commit()}catch(e){msg('File proyek tidak valid.')}};r.readAsText(f)}
 function setSize(){H=$('sz').value=='story'?1600:1273}
 function setTpl(k,quiet){tpl=k;if(!quiet)setCol(k);$('tpls').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.k==k));if(!quiet)redraw()}
 function loadImg(f,cb){if(!f)return;const im=new Image();im.onload=()=>{im._blob=f;idbPut(iid(im),f);cb(im)};im.onerror=()=>msg('File tidak bisa dibaca sebagai gambar.');im.src=URL.createObjectURL(f)}
 
-
+// Susun antarmuka
 for(const k in TPL){const b=document.createElement('button');b.className='th';b.innerHTML=`<canvas width="180" height="255" data-k="${k}" aria-hidden="true"></canvas><span>${TPL[k]}</span>`;b.dataset.k=k;b.setAttribute('aria-pressed',k==tpl);b.onclick=()=>{setTpl(k);commit()};$('tpls').appendChild(b)}
 PAL.forEach(p=>{const b=document.createElement('button');b.className='pal';b.innerHTML=`<span class="sws"><i style="background:${p[1]}"></i><i style="background:${p[2]}"></i><i style="background:${p[3]}"></i></span>${p[0]}`;b.onclick=()=>{$('c1').value=p[1];$('c2').value=p[2];$('c3').value=p[3];redraw();commit()};$('pals').appendChild(b)});
 FONTS.forEach(f=>$('font').insertAdjacentHTML('beforeend',`<option>${f}</option>`));
@@ -462,7 +466,7 @@ $('pz').oninput=()=>setZoom($('pz').value/100);$('pzr').onclick=()=>{pz={z:1,x:0
 $('sp').onclick=saveProj;$('lpb').onclick=()=>$('lp').click();$('lp').onchange=e=>{if(e.target.files[0])loadProj(e.target.files[0]);e.target.value=''};
 document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>out(b.dataset.f));
 Promise.all(FONTS.map(f=>document.fonts.load(`700 40px "${f}"`).catch(()=>0))).then(redraw);
-
+// Animasi: loop pratinjau + rekam video
 const rmq=matchMedia('(prefers-reduced-motion:reduce)');let lf=0;
 function loop(t){requestAnimationFrame(loop);if(document.hidden||drag||(rmq.matches&&!recOn)||(!$('an').checked&&!recOn)||!$('gz').checked||t-lf<40)return;lf=t;TT=t/1000;draw()}
 requestAnimationFrame(loop);
@@ -474,29 +478,43 @@ async function rec(){if(!window.MediaRecorder||!cv.captureStream){msg('Browser i
  recOn=true;mr.start();msg('Merekam 5 detik. Jangan pindah tab ya.');setTimeout(()=>mr.stop(),5000)}
 $('vid').onclick=rec;
 draw();
-
+// ---- Ukuran poster otomatis mengikuti ruang tengah (tanpa scroll halaman) ----
 function fit(){const wk=$('wk'),cs=getComputedStyle(wk),aw=wk.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-14,ah=wk.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)-14;if(aw<50||ah<50)return;const k=Math.min(aw/W,ah/H);cv.style.width=Math.floor(W*k)+'px';cv.style.height=Math.floor(H*k)+'px'}
 new ResizeObserver(fit).observe($('wk'));fit();
 
 
+// ---- Hapus logo: daftar logo + tombol hapus per logo / semua ----
+function renderLogos(){const L=items.filter(i=>i.lg),box=$('llist');if(!box)return;box.innerHTML='';
+ L.forEach(it=>{const r=document.createElement('div');r.className='lrow';r.dataset.sel=sel==='i'+it.id?'1':'0';
+  const im=document.createElement('img');im.alt='';im.src=it.im.src;
+  const n=document.createElement('button');n.className='ln';n.type='button';n.textContent='Logo '+it.n;n.title='Pilih logo ini';
+  n.onclick=()=>{sel='i'+it.id;refreshEl();syncCtl();draw()};
+  const d=document.createElement('button');d.className='ld';d.type='button';d.textContent='Hapus';d.setAttribute('aria-label','Hapus Logo '+it.n);
+  d.onclick=()=>delLogo(it);
+  r.append(im,n,d);box.appendChild(r)});
+ $('lclear').hidden=L.length<2}
+function delLogo(it){items=items.filter(i=>i!==it);if(sel==='i'+it.id)sel='judul';refreshEl();syncCtl();draw();commit();msg('Logo dihapus.')}
+$('lclear').onclick=()=>{const n=items.filter(i=>i.lg).length;if(!n||!confirm('Hapus semua '+n+' logo?'))return;items=items.filter(i=>!i.lg);if(!getIt()&&!(sel in ELS))sel='judul';refreshEl();syncCtl();draw();commit();msg('Semua logo dihapus.')};
+renderLogos();
+// ---- Banyak logo: tiap logo jadi elemen gambar yang bebas digeser ----
 function lgItem(im,k){const r=Math.min(140/im.width,140/im.height),w=Math.round(im.width*r),h=Math.round(im.height*r);return{id:++uid,t:'image',n:(cnt.logo=(cnt.logo||0)+1),c:ecol,rot:0,op:100,im,w,h,lg:1,x:W-36-w-(k%5)*152,y:36+Math.floor(k/5)*152}}
 function addLogo(im){const it=lgItem(im,items.filter(i=>i.lg).length);items.push(it);sel='i'+it.id;refreshEl();syncCtl();draw();commit()}
 
-
+// ---- Geser dan zoom foto utama ----
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 function clampPz(){if(!PI)return;pz.x=clamp(pz.x,-Math.abs(PI.bw*pz.z-PI.w)/2/PI.w,Math.abs(PI.bw*pz.z-PI.w)/2/PI.w);pz.y=clamp(pz.y,-Math.abs(PI.bh*pz.z-PI.h)/2/PI.h,Math.abs(PI.bh*pz.z-PI.h)/2/PI.h)}
 function picHit(p){if(!img||!PI)return null;const q=PI.T.inverse().transformPoint(new DOMPoint(p.x,p.y)),X=q.x-PI.x,Y=q.y-PI.y;if(X<0||Y<0||X>PI.w||Y>PI.h)return null;if(PI.sh=='circle'){const a=PI.w/2,b=PI.h/2;if(((X-a)/a)**2+((Y-b)/b)**2>1)return null}return q}
 function syncPz(){const z=Math.round(pz.z*100);$('pz').value=z;$('pzv').textContent=z;$('pz').disabled=$('pzr').disabled=!img}
 function setZoom(z){pz.z=clamp(z,1,4);clampPz();syncPz();req();cmt()}
 
-
+// ---- Registri gambar (untuk undo/redo dan simpan otomatis) ----
 const IM={};let imgSeq=0;const iid=im=>{if(!im)return null;if(!im._id){im._id=++imgSeq;IM[im._id]=im}return im._id};
 let _db=null;const db=()=>_db||(_db=new Promise((ok,no)=>{const r=indexedDB.open('postera',1);r.onupgradeneeded=()=>r.result.createObjectStore('img');r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)}));
 const idbPut=(k,b)=>db().then(d=>d.transaction('img','readwrite').objectStore('img').put(b,k)).catch(()=>{});
 const idbAll=()=>db().then(d=>new Promise((ok,no)=>{const t=d.transaction('img'),s=t.objectStore('img'),k=s.getAllKeys(),v=s.getAll();t.oncomplete=()=>ok(k.result.map((x,i)=>[x,v.result[i]]));t.onerror=()=>no(t.error)}));
 const idbPrune=keep=>db().then(d=>{const s=d.transaction('img','readwrite').objectStore('img');s.getAllKeys().onsuccess=e=>e.target.result.forEach(k=>{if(!keep.has(k))s.delete(k)})}).catch(()=>{});
 
-
+// ---- Undo / redo ----
 const HF=FIELDS.filter(f=>f!='q');
 function snapObj(){const d={tpl,gr:$('gr').checked,ft:$('ft').checked,gz:$('gz').checked,off,pz:{z:+pz.z.toFixed(3),x:+pz.x.toFixed(4),y:+pz.y.toFixed(4)},img:iid(img),logo:iid(logo),f:{},
  items:items.map(i=>{const{im,...r}=i;if(r.t=='text')delete r.h;r.ii=iid(im);return r})};HF.forEach(i=>d.f[i]=$(i).value);return d}
@@ -517,7 +535,7 @@ function redo(){flush();if(hi<hist.length-1){restore(JSON.parse(hist[++hi]));upd
 $('undo').onclick=undo;$('redo').onclick=redo;
 document.addEventListener('keydown',e=>{if(!(e.ctrlKey||e.metaKey)||e.altKey)return;const k=e.key.toLowerCase();if(k=='z'&&!e.shiftKey){e.preventDefault();undo()}else if(k=='y'||(k=='z'&&e.shiftKey)){e.preventDefault();redo()}});
 
-
+// ---- Simpan otomatis (localStorage untuk status, IndexedDB untuk gambar) ----
 const AK='postera:autosave:v1';let asWarn=false,at=0;
 function autosave(){try{localStorage.setItem(AK,JSON.stringify({v:1,t:Date.now(),s:snapObj(),uid,cnt,q:$('q').value}));$('as').textContent='Tersimpan otomatis pukul '+new Date().toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'})+'.'}
  catch(e){$('as').textContent='Simpan otomatis tidak tersedia di browser ini.';if(!asWarn){asWarn=true;msg('Simpan otomatis tidak tersedia di browser ini.')}}}
@@ -538,4 +556,3 @@ syncPz();initAuto();
 </script>
 </body>
 </html>
-
